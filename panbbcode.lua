@@ -164,7 +164,7 @@ function CaptionedImage(src, attr, title)
 end
 
 function Code(s, attr)
-  return string.format("[code]%s[/code]", s)
+  return enclose('font', s, 'Courier New');
 end
 
 function InlineMath(s)

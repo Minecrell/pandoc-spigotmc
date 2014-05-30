@@ -230,7 +230,7 @@ end
 local function makelist(items, ltype)
   local buf = string.format("[list=%s]", ltype)
   for _,e in ipairs(items) do
-    buf = buf .. enclose('*', e) .. '\n'
+    buf = buf .. '[*]' .. e .. '\n'
   end
   buf = buf .. '[/list]'
   return buf

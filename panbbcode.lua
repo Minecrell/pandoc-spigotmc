@@ -196,9 +196,9 @@ function Header(level, s, attr)
   if level == 1 then
     return enclose('b', enclose('size', s, 7));
   elseif level == 2 then
-    return enclose('b', enclose('u', s))
+    return enclose('b', enclose('u', enclose('size', s .. ':', 5)))
   else
-    return enclose('b', s)
+    return enclose('b', enclose('u', s))
   end
 end
 

@@ -5,7 +5,6 @@
 -- Licensed under the GNU General Public License v3 or later.
 -- Written for Lua 5.{1,2}
 
--- Table to store footnotes, so they can be included at the end.
 local function enclose(t, s, p)
   if p then
     return string.format("[%s=%s]%s[/%s]", t, p, s, t)
@@ -14,11 +13,12 @@ local function enclose(t, s, p)
   end
 end
 
+-- Table to store footnotes, so they can be included at the end.
 local notes = {}
 
 -- Blocksep is used to separate block elements.
 function Blocksep()
-  return "\n\n"
+  return '\n\n'
 end
 
 -- This function is called once for the whole document. Parameters:

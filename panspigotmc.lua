@@ -32,9 +32,9 @@ function Doc(body, metadata, variables)
     _(metadata['title'])
   end
   _(body)
-  if #cache_notes > 0 then
+  if #notes > 0 then
     _("--")
-    for i,n in ipairs(cache_notes) do
+    for i,n in ipairs(notes) do
       _(string.format("[%d] %s", i, n))
     end
   end

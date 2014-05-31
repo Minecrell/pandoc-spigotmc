@@ -1,10 +1,11 @@
--- panbbcode - BBCode writer for pandoc
+-- panspigotmc - SpigotMC BBCode writer for pandoc
+-- Originally written by Jens Oliver John, adapted for SpigotMC by Minecrell.
+-- Original copyright:
 -- Copyright (C) 2014 Jens Oliver John < dev ! 2ion ! de >
 -- Licensed under the GNU General Public License v3 or later.
 -- Written for Lua 5.{1,2}
 
--- PRIVATE
-
+-- Table to store footnotes, so they can be included at the end.
 local function enclose(t, s, p)
   if p then
     return string.format("[%s=%s]%s[/%s]", t, p, s, t)
@@ -13,87 +14,16 @@ local function enclose(t, s, p)
   end
 end
 
-local function lookup(t, e)
-  for _,v in ipairs(t) do
-    if v == e then
-        return true
-    end
-  end
-  return false
+local notes = {}
+
+-- Blocksep is used to separate block elements.
+function Blocksep()
+  return "\n\n"
 end
 
-local strlen_ger_utf8_t = { [0xc3] = { 0xa4, 0x84, 0xbc, 0x9c, 0xb6, 0x96, 0x9f } }
-
--- FIXME: check also the byte *after* occurences of 0xc3 (and keep the
--- loop for that)
-local function strlen_ger_utf8(w)
-  local s = {}
-  local len = 0
-  w:gsub("(.)", function (c)
-    table.insert(s, c:byte())
-  end)
-  for i=1,#s do
-    if strlen_ger_utf8_t[s[i]] then
-      i = i + 1
-    else
-      len = len + 1
-    end
-  end
-  return len
-end
-
-local function column(s, sep, blind)
-  local s = s
-  local sep = sep or "   "
-  local blind = blind or ""
-  local ret = ""
-
-  local y = {}
-  local x = {}
-  local cm = 0
-  local i = 0
-
-  for line in s:gmatch("[^\r\n]+") do
-    local ly = {}
-    local cc = 0
-    line:gsub("[^@]+", function (m)
-      local len = #m
-      cc = cc + 1
-      if cc > cm then 
-        x[cc] = 0
-        cm = cc
-      end
-      if len > x[cc] then
-        x[cc] = len
-      end
-      table.insert(ly, m)
-    end)
-    table.insert(y, ly)
-  end
-  for _,line in ipairs(y) do
-    for tmp=1,(#x-#line) do
-        table.insert(line, blind)
-    end
-    for i,word in ipairs(line) do
-      -- workaround for common German utf-8 umlauts
-      local wl = word:match("[öäüÖÄÜß]") and strlen_ger_utf8(word) or #word
-      if wl < x[i] then
-        for tmp=1,(x[i]-wl) do
-          word = word .. " "
-        end
-      end
-     ret = ret .. word .. sep
-    end
-    ret = ret .. '\n'
-  end
-  return ret
-end
-
--- PUBLIC
-
-local cache_notes = {}
-
-function Doc( body, meta, vars )
+-- This function is called once for the whole document. Parameters:
+-- body is a string, metadata is a table, variables is a table.
+function Doc(body, metadata, variables)
   local buf = {}
   local function _(e)
     table.insert(buf, e)
@@ -111,6 +41,11 @@ function Doc( body, meta, vars )
   return table.concat(buf, '\n')
 end
 
+-- The functions that follow render corresponding pandoc elements.
+-- s is always a string, attr is always a table of attributes, and
+-- items is always an array of strings (the items in a list).
+-- Comments indicate the types of other variables.
+
 function Str(s)
   return s
 end
@@ -124,7 +59,7 @@ function LineBreak()
 end
 
 function Emph(s)
-  return enclose('em', s)
+  return enclose('i', s)
 end
 
 function Strong(s)
@@ -147,24 +82,16 @@ function Strikeout(s)
   return enclose('s', s)
 end
 
-function Link(s, src, title)
+function Link(s, src, tit)
   return enclose('url', s, src)
 end
 
-function Image(s, src, title)
-  return enclose('img', s, src)
-end
-
-function CaptionedImage(src, attr, title)
-  if not title or title == "" then
-    return enclose('img', src)
-  else
-    return enclose('img', src, title)
-  end
+function Image(s, src, tit)
+  return enclose('img', src)
 end
 
 function Code(s, attr)
-  return enclose('font', s, 'Courier New');
+  return enclose('font', s, 'Courier New')
 end
 
 function InlineMath(s)
@@ -176,11 +103,15 @@ function DisplayMath(s)
 end
 
 function Note(s)
-  table.insert(cache_notes, s)
-  return string.format("[%d]", #cache_notes)
+  table.insert(notes, s)
+  return string.format("[%d]", #notes)
 end
 
 function Span(s, attr)
+  return s
+end
+
+function Cite(s)
   return s
 end
 
@@ -192,14 +123,9 @@ function Para(s)
   return s
 end
 
-function Header(level, s, attr)
-  if level == 1 then
-    return enclose('b', enclose('size', s, 7));
-  elseif level == 2 then
-    return enclose('b', enclose('u', enclose('size', s .. ':', 5)))
-  else
-    return enclose('b', enclose('u', s))
-  end
+-- lev is an integer, the header level.
+function Header(lev, s, attr)
+  return enclose('h' .. (lev + 1), s)
 end
 
 function BlockQuote(s)
@@ -211,16 +137,8 @@ function BlockQuote(s)
   end
 end
 
-function Cite(s)
-  return s
-end
-
-function Blocksep(s)
-  return "\n\n"
-end
-
-function HorizontalRule(s)
-  return '--'
+function HorizontalRule()
+  return '---'
 end
 
 function CodeBlock(s, attr)
@@ -244,6 +162,7 @@ function OrderedList(items)
   return makelist(items, '1')
 end
 
+-- Revisit association list STackValue instance.
 function DefinitionList(items)
   local buf = ""
   local function mkdef(k,v)
@@ -257,11 +176,24 @@ function DefinitionList(items)
   return buf
 end
 
+-- Convert pandoc alignment to something HTML can use.
+-- align is AlignLeft, AlignRight, AlignCenter, or AlignDefault.
 function html_align(align)
-  return ""
+  if align == 'AlignLeft' then
+    return 'left'
+  elseif align == 'AlignRight' then
+    return 'right'
+  elseif align == 'AlignCenter' then
+    return 'center'
+  else
+    return 'left'
+  end
 end
 
-function Table(cap, align, widths, headers, rows)
+-- Caption is a string, aligns is an array of strings,
+-- widths is an array of floats, headers is an array of
+-- strings, rows is an array of arrays of strings.
+function Table(caption, aligns, widths, headers, rows)
   local buf = {}
   for _,r in ipairs(rows) do
     local rbuf = ""
@@ -282,8 +214,9 @@ function Div(s, attr)
   return s
 end
 
--- boilerplate
-
+-- The following code will produce runtime warnings when you haven't defined
+-- all of the functions you need for the custom writer, so it's useful
+-- to include when you're working on a writer.
 local meta = {}
 meta.__index =
   function(_, key)

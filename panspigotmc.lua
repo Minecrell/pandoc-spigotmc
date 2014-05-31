@@ -28,8 +28,8 @@ function Doc(body, metadata, variables)
   local function _(e)
     table.insert(buf, e)
   end
-  if meta['title'] and meta['title'] ~= "" then
-    _(meta['title'])
+  if metadata['title'] and metadata['title'] ~= "" then
+    _(metadata['title'])
   end
   _(body)
   if #cache_notes > 0 then

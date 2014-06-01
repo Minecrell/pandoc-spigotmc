@@ -18,7 +18,7 @@ local notes = {}
 
 -- Blocksep is used to separate block elements.
 function Blocksep()
-  return '\n\n'
+  return LineBreak()
 end
 
 -- This function is called once for the whole document. Parameters:

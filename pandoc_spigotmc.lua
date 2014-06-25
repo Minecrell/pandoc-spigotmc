@@ -90,7 +90,7 @@ function Image(s, src, tit)
   return enclose('img', src)
 end
 
-function CaptionedImage(s, src, tit)
+function CaptionedImage(src, tit, txt)
   return enclose('img', src)
 end
 

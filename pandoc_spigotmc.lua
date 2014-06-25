@@ -90,6 +90,11 @@ function Image(s, src, tit)
   return enclose('img', src)
 end
 
+function CaptionedImage(s, src, tit)
+  return enclose('img', src)
+end
+
+
 function Code(s, attr)
   return enclose('font', s, 'Courier New')
 end

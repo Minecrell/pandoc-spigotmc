@@ -1,30 +1,30 @@
 <?php
     if (!empty($_POST['md'])) {
         header('Content-Type: text/plain');
-    
+
         $input = $_POST['md'];
         if (filter_var($input, FILTER_VALIDATE_URL))
             $input = @file_get_contents($input);
-            
+
         $descriptorspec = array(
             0 => array("pipe", "r"),
             1 => array("pipe", "w")
         );
-        
-        $cwd = '/tmp';
-        $bbcode_writer = __DIR__ . '/pandoc_spigotmc.lua';
+
+        $cwd = __DIR__;
+        $bbcode_writer = 'pandoc_spigotmc.lua';
 
         $process = proc_open("pandoc -t $bbcode_writer", $descriptorspec, $pipes, $cwd);
         if (is_resource($process)) {
             fwrite($pipes[0], $input);
             fclose($pipes[0]);
-            
+
             echo stream_get_contents($pipes[1]);
             fclose($pipes[1]);
-            
+
             $return_value = proc_close($process);
         }
-        
+
         exit;
     }
 ?>
@@ -64,7 +64,7 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <!--<![endif]-->
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-    
+
     <script>
         $(function() {
             $("#submit").click(function(event) {

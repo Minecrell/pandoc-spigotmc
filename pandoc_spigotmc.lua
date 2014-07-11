@@ -91,7 +91,7 @@ function Image(s, src, tit)
 end
 
 function CaptionedImage(src, tit, txt)
-  return LineBreak() . enclose('center', enclose('img', src))
+  return '\n' . enclose('center', enclose('img', src))
 end
 
 

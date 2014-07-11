@@ -51,7 +51,7 @@
         <form role="form" method="post">
             <div class="form-group">
                 <label for="md">Markdown</label>
-                <textarea class="form-control" id="md" name="md" placeholder="Enter Markdown here" rows="25"></textarea>
+                <textarea class="form-control" id="md" name="md" placeholder="Enter Markdown here" rows="25" style="font-family: monospace;"></textarea>
             </div>
             <button id="submit" type="submit" class="btn btn-primary">Submit</button>
         </form>

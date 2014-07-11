@@ -16,11 +16,6 @@ end
 -- Table to store footnotes, so they can be included at the end.
 local notes = {}
 
--- Blocksep is used to separate block elements.
-function Blocksep()
-  return LineBreak()
-end
-
 -- This function is called once for the whole document. Parameters:
 -- body is a string, metadata is a table, variables is a table.
 function Doc(body, metadata, variables)
@@ -46,91 +41,33 @@ end
 -- items is always an array of strings (the items in a list).
 -- Comments indicate the types of other variables.
 
-function Str(s)
+function Plain(s)
   return s
-end
-
-function Space()
-  return ' '
-end
-
-function LineBreak()
-  return '\n'
-end
-
-function Emph(s)
-  return enclose('i', s)
-end
-
-function Strong(s)
-  return enclose('b', s)
-end
-
-function Subscript(s)
-  return string.format("{%s}", s)
-end
-
-function Superscript(s)
-  return string.format("[%s]", s)
-end
-
-function SmallCaps(s)
-  return s
-end
-
-function Strikeout(s)
-  return enclose('s', s)
-end
-
-function Link(s, src, tit)
-  return enclose('url', s, src)
-end
-
-function Image(s, src, tit)
-  return enclose('img', src)
 end
 
 function CaptionedImage(src, tit, txt)
-  return '\n' . enclose('center', enclose('img', src))
-end
-
-
-function Code(s, attr)
-  return enclose('font', s, 'Courier New')
-end
-
-function InlineMath(s)
-  return s
-end
-
-function DisplayMath(s)
-  return s
-end
-
-function Note(s)
-  table.insert(notes, s)
-  return string.format("[%d]", #notes)
-end
-
-function Span(s, attr)
-  return s
-end
-
-function Cite(s)
-  return s
-end
-
-function Plain(s)
-  return s
+  return LineBreak() .. enclose('center', enclose('img', src))
 end
 
 function Para(s)
   return s
 end
 
+function RawBlock(s)
+    return RawInline(s)
+end
+
+function HorizontalRule()
+  return '---'
+end
+
 -- lev is an integer, the header level.
 function Header(lev, s, attr)
   return enclose('h' .. (lev + 1), s)
+end
+
+function CodeBlock(s, attr)
+  return enclose('code', s, attr)
 end
 
 function BlockQuote(s)
@@ -142,12 +79,24 @@ function BlockQuote(s)
   end
 end
 
-function HorizontalRule()
-  return '---'
-end
-
-function CodeBlock(s, attr)
-  return enclose('code', s)
+-- Caption is a string, aligns is an array of strings,
+-- widths is an array of floats, headers is an array of
+-- strings, rows is an array of arrays of strings.
+function Table(caption, aligns, widths, headers, rows)
+  local buf = {}
+  for _,r in ipairs(rows) do
+    local rbuf = ""
+    for i,c in ipairs(r) do
+      if i~=#r then
+        rbuf = rbuf .. c .. '@'
+      else
+        rbuf = rbuf .. c
+      end
+    end
+    table.insert(buf, rbuf)
+  end
+  local cin = table.concat(buf, '\n')
+  return enclose('code', column(cin))
 end
 
 local function makelist(items, ltype)
@@ -181,41 +130,95 @@ function DefinitionList(items)
   return buf
 end
 
--- Convert pandoc alignment to something HTML can use.
--- align is AlignLeft, AlignRight, AlignCenter, or AlignDefault.
-function html_align(align)
-  if align == 'AlignLeft' then
-    return 'left'
-  elseif align == 'AlignRight' then
-    return 'right'
-  elseif align == 'AlignCenter' then
-    return 'center'
-  else
-    return 'left'
-  end
-end
-
--- Caption is a string, aligns is an array of strings,
--- widths is an array of floats, headers is an array of
--- strings, rows is an array of arrays of strings.
-function Table(caption, aligns, widths, headers, rows)
-  local buf = {}
-  for _,r in ipairs(rows) do
-    local rbuf = ""
-    for i,c in ipairs(r) do
-      if i~=#r then
-        rbuf = rbuf .. c .. '@'
-      else
-        rbuf = rbuf .. c
-      end
-    end
-    table.insert(buf, rbuf)
-  end
-  local cin = table.concat(buf, '\n')
-  return enclose('code', column(cin))
-end
-
 function Div(s, attr)
+  return s
+end
+
+
+-- Blocksep is used to separate block elements.
+function Blocksep()
+  return LineBreak()
+end
+
+function Str(s)
+  return s
+end
+
+function Space()
+  return ' '
+end
+
+function Emph(s)
+  return enclose('i', s)
+end
+
+function Strong(s)
+  return enclose('b', s)
+end
+
+function Strikeout(s)
+  return enclose('s', s)
+end
+
+function Subscript(s)
+  return string.format("{%s}", s)
+end
+
+function Superscript(s)
+  return string.format("[%s]", s)
+end
+
+function SmallCaps(s)
+  return s
+end
+
+function SingleQuoted(s)
+  return '\'' .. s .. '\''
+end
+
+function DoubleQuoted(s)
+  return '"' .. s .. '"'
+end
+
+function Cite(s)
+  return s
+end
+
+function Code(s, attr)
+  return enclose('font', s, 'Courier New')
+end
+
+-- What is this?
+function DisplayMath(s)
+  return InlineMath(s)
+end
+
+function InlineMath(s)
+  return Code(s, 'math')
+end
+
+function RawInline(s)
+  return enclose('plain', s)
+end
+
+function LineBreak()
+  return '\n'
+end
+
+function Link(s, src, tit)
+  return enclose('url', s, src)
+end
+
+function Image(s, src, tit)
+  return enclose('img', src)
+end
+
+function Note(s)
+  table.insert(notes, s)
+  return string.format("[%d]", #notes)
+end
+
+function Span(s, attr)
   return s
 end
 

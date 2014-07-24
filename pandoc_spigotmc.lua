@@ -67,7 +67,7 @@ function Header(lev, s, attr)
 end
 
 function CodeBlock(s, attr)
-  return enclose('code', s, attr)
+  return enclose('code', s, attr.class)
 end
 
 function BlockQuote(s)

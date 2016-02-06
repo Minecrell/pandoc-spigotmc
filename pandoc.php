@@ -36,12 +36,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>SpigotMC Markdown to BBCode Converter</title>
 
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/bootstrap/3.3.5/css/bootstrap.min.css">
-
-    <!--[if lt IE 9]>
-      <script src="//cdn.jsdelivr.net/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="//cdn.jsdelivr.net/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css">
   </head>
   <body>
     <div class="container">
@@ -57,12 +52,7 @@
         </form>
     </div>
 
-    <!--[if lt IE 9]>
-    <script src="//cdn.jsdelivr.net/jquery/1.11.3/jquery.min.js"></script>
-    <![endif]-->
-    <!--[if gte IE 9]><!-->
-    <script src="//cdn.jsdelivr.net/jquery/2.1.4/jquery.min.js"></script>
-    <!--<![endif]-->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
 
     <script>
         $(function() {

@@ -12,7 +12,10 @@
         );
 
         $cwd = __DIR__;
-        $bbcode_writer = 'pandoc_spigotmc.lua';
+        $bbcode_writer = 'pandoc_xenforo.lua';
+
+        if ($_POST['type'] == 'SpigotMC')
+          $bbcode_writer = 'pandoc_spigotmc.lua';
 
         $process = proc_open("pandoc -t $bbcode_writer", $descriptorspec, $pipes, $cwd);
         if (is_resource($process)) {
@@ -34,19 +37,25 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>SpigotMC Markdown to BBCode Converter</title>
+    <title>Markdown to XenForo BBCode Converter</title>
 
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css">
   </head>
   <body>
     <div class="container">
         <div class="page-header">
-            <h1>Markdown to BBCode Converter</h1>
+            <h1>Markdown to XenForo BBCode Converter</h1>
         </div>
         <form role="form" method="post">
             <div class="form-group">
                 <label for="md">Markdown</label>
                 <textarea class="form-control" id="md" name="md" placeholder="Enter Markdown here" rows="25" style="font-family: monospace;"></textarea>
+                <br>
+                <label for="type">Type</label>
+                <select id="type" name="type">
+                    <option>XenForo</option>
+                    <option>SpigotMC</option>
+                </select>
             </div>
             <button id="submit" type="submit" class="btn btn-primary">Submit</button>
         </form>
@@ -58,7 +67,7 @@
         $(function() {
             $("#submit").click(function(event) {
                 event.preventDefault();
-                $.post("", { "md": $("#md").val() }, function(data) {
+                $.post("", { "md": $("#md").val(), "type": $("#type").val() }, function(data) {
                     $("#md").val(data);
                 }, "text");
             });
